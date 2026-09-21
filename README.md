@@ -1,8 +1,20 @@
 # go-jev
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/draganm/go-jev.svg)](https://pkg.go.dev/github.com/draganm/go-jev)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](LICENSE)
+
 A Go client for the [TypeSafe](https://docs.typesafe.ai) System One API, which serves the Jev models.
 
 Send a state and typed questions; get structured answers with calibrated probabilities.
+
+- All three question types: **Noul** (yes/no probability), **Choice** (pick one option) and
+  **Score** (rate against ordered levels)
+- Fluent request builder that collects all validation errors in one place
+- Typed answers and errors, with `errors.Is` sentinels for common failures
+- Retries with backoff and `Retry-After` support, matching the official SDKs
+- No dependencies beyond the Go standard library (requires Go 1.26+)
+
+This is an unofficial client. It is not affiliated with or endorsed by TypeSafe.
 
 ```sh
 go get github.com/draganm/go-jev
@@ -96,3 +108,9 @@ and the client honors `Retry-After` / `retry-after-ms` up to 60s. Pass
 nix develop   # or direnv allow
 go test -race ./...
 ```
+
+## License
+
+Licensed under the [GNU Lesser General Public License v3.0](LICENSE). You can use this
+library in proprietary programs; changes to the library itself must be shared under the
+same license.
