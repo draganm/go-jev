@@ -14,24 +14,20 @@ func Example() {
 		log.Fatal(err)
 	}
 
-	res, err := client.Ask(context.Background(), &jev.Request{
-		State: "Help! My payouts have been failing for 3 days.",
-		Questions: map[string]jev.Question{
-			"is_urgent": jev.Noul{Instructions: "Does this convey urgency?"},
-			"department": jev.Choice{
-				Instructions: "Which team should handle this?",
-				Options: []jev.ChoiceOption{
-					{Name: "billing", Description: "Payments, invoicing, refunds"},
-					{Name: "technical", Description: "Bugs, outages, integrations"},
-					{Name: "sales", Description: "Pricing, upgrades, new accounts"},
-				},
-			},
-			"frustration": jev.Score{
-				Instructions: "How frustrated is the customer?",
-				Levels:       jev.Levels("Calm", "Frustrated", "Very angry"),
-			},
-		},
-	})
+	req, err := jev.NewRequest("Help! My payouts have been failing for 3 days.").
+		Noul("is_urgent", "Does this convey urgency?").
+		Choice("department", "Which team should handle this?",
+			jev.Opt("billing", "Payments, invoicing, refunds"),
+			jev.Opt("technical", "Bugs, outages, integrations"),
+			jev.Opt("sales", "Pricing, upgrades, new accounts"),
+		).
+		Score("frustration", "How frustrated is the customer?", "Calm", "Frustrated", "Very angry").
+		Build()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := client.Ask(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}

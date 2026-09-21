@@ -16,14 +16,17 @@
 //	if err != nil {
 //		return err
 //	}
-//	res, err := client.Ask(ctx, &jev.Request{
-//		State: "Help! My payouts have been failing for 3 days.",
-//		Questions: map[string]jev.Question{
-//			"is_urgent": jev.Noul{Instructions: "Does this convey urgency?"},
-//		},
-//	})
+//	req, err := jev.NewRequest("Help! My payouts have been failing for 3 days.").
+//		Noul("is_urgent", "Does this convey urgency?").
+//		Build()
 //	if err != nil {
 //		return err
 //	}
-//	fmt.Println(res.Answers["is_urgent"].Noul)
+//	res, err := client.Ask(ctx, req)
+//	if err != nil {
+//		return err
+//	}
+//	urgent, err := res.Noul("is_urgent")
+//
+// Requests can also be built as [Request] struct literals.
 package jev

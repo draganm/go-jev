@@ -16,31 +16,44 @@ if err != nil {
 	log.Fatal(err)
 }
 
-res, err := client.Ask(ctx, &jev.Request{
-	State: "Help! My payouts have been failing for 3 days.",
-	Questions: map[string]jev.Question{
-		"is_urgent": jev.Noul{Instructions: "Does this convey urgency?"},
-		"department": jev.Choice{
-			Instructions: "Which team should handle this?",
-			Options: []jev.ChoiceOption{
-				{Name: "billing", Description: "Payments, invoicing, refunds"},
-				{Name: "technical", Description: "Bugs, outages, integrations"},
-				{Name: "sales", Description: "Pricing, upgrades, new accounts"},
-			},
-		},
-		"frustration": jev.Score{
-			Instructions: "How frustrated is the customer?",
-			Levels:       jev.Levels("Calm", "Frustrated", "Very angry"),
-		},
-	},
-})
+req, err := jev.NewRequest("Help! My payouts have been failing for 3 days.").
+	Noul("is_urgent", "Does this convey urgency?").
+	Choice("department", "Which team should handle this?",
+		jev.Opt("billing", "Payments, invoicing, refunds"),
+		jev.Opt("technical", "Bugs, outages, integrations"),
+		jev.Opt("sales", "Pricing, upgrades, new accounts"),
+	).
+	Score("frustration", "How frustrated is the customer?", "Calm", "Frustrated", "Very angry").
+	Build()
+if err != nil {
+	log.Fatal(err) // collects every problem: duplicate ids, invalid questions, ...
+}
+
+res, err := client.Ask(ctx, req)
 if err != nil {
 	log.Fatal(err)
 }
 
-urgent, _ := res.Noul("is_urgent")      // 0.95
-dept, _ := res.Choice("department")     // dept.Choice, dept.Probabilities, dept.Confidence
+urgent, _ := res.Noul("is_urgent")         // 0.95
+dept, _ := res.Choice("department")        // dept.Choice, dept.Probabilities, dept.Confidence
 frustration, _ := res.Score("frustration") // frustration.Score, .Legend, .Probabilities, .Confidence
+```
+
+Other builder methods: `Model(...)`, `NoulWithCriteria(id, instructions, whenTrue, whenFalse)`,
+`Question(id, q)` for a prebuilt question, and `jev.ChoiceOptions("a", "b")...` for options
+without descriptions.
+
+You can also build the request as a struct literal instead:
+
+```go
+req := &jev.Request{
+	State: "Help! My payouts have been failing for 3 days.",
+	Questions: map[string]jev.Question{
+		"is_urgent":   jev.Noul{Instructions: "Does this convey urgency?"},
+		"department":  jev.Choice{Instructions: "Which team?", Options: jev.ChoiceOptions("billing", "technical")},
+		"frustration": jev.Score{Instructions: "How frustrated?", Levels: jev.Levels("Calm", "Angry")},
+	},
+}
 ```
 
 `State`, `Instructions`, option descriptions and score levels accept a string or any
